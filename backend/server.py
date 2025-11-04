@@ -9,6 +9,8 @@ import os
 import pandas as pd
 from utils.preprocess import load_movies
 from db import init_db, load_profile as db_load_profile, upsert_profile as db_upsert_profile, load_profile_by_account, load_profile_by_email, next_user_id
+from movies_data import MOVIES, get_movie, get_all_movies
+from movie_urls import get_streaming_url
 import bcrypt
 
 app = FastAPI(title="MAFork Recommender API")
@@ -123,29 +125,21 @@ def login(body: LoginRequest):
 
 @app.get("/survey/schema", response_model=SurveySchemaResponse)
 def survey_schema():
-    if movies is None or movies.empty:
-        return SurveySchemaResponse(genres=[], years=[])
-    def normalize_genres(s: str) -> List[str]:
-        parts = []
-        for token in str(s).split('|'):
-            t = token.strip().strip('()').strip()
-            if t and t.lower() != 'no genres listed':
-                parts.append(t)
-        return parts
+    # Use movies_data.py instead of movies.csv
     genre_set = set()
-    if "genres" in movies.columns:
-        for g in movies["genres"].dropna().astype(str):
-            for part in normalize_genres(g):
-                genre_set.add(part)
     years = set()
-    if "title" in movies.columns:
-        for t in movies["title"].dropna().astype(str):
-            if t.endswith(")") and "(" in t:
-                y = t.rsplit("(", 1)[-1].rstrip(")")
-                if y.isdigit():
-                    years.add(int(y))
-    years_list = sorted(years)
-    return SurveySchemaResponse(genres=sorted(genre_set), years=years_list)
+    
+    for movie in MOVIES:
+        # Collect genres
+        if movie.get("genres"):
+            for genre in movie["genres"]:
+                if genre and genre.strip():
+                    genre_set.add(genre.strip())
+        # Collect years
+        if movie.get("year"):
+            years.add(int(movie["year"]))
+    
+    return SurveySchemaResponse(genres=sorted(genre_set), years=sorted(years))
 
 
 @app.post("/survey/submit")
@@ -187,50 +181,87 @@ def save_profile(user_id: int, body: Profile):
 
 @app.get("/image/{movie_id}")
 def image(movie_id: int, type: str = "poster"):
-    movie_id = max(1, min(500, movie_id))
-    if type == "hero":
-        url = f"https://picsum.photos/seed/movie{movie_id}/1200/600"
+    movie = get_movie(movie_id)
+    if movie and movie.get("poster_path"):
+        # Use TMDB CDN for real movie posters
+        base_url = "https://image.tmdb.org/t/p"
+        if type == "hero":
+            # Use backdrop/original for hero images
+            url = f"{base_url}/w1280{movie['poster_path']}"
+        else:
+            # Use w500 for poster images
+            url = f"{base_url}/w500{movie['poster_path']}"
+        return RedirectResponse(url)
+    # Fallback to placeholder
+    if movie:
+        seed = movie["title"].replace(" ", "").lower()
+        if type == "hero":
+            url = f"https://picsum.photos/seed/{seed}/1200/600"
+        else:
+            url = f"https://picsum.photos/seed/{seed}/400/600"
     else:
-        url = f"https://picsum.photos/seed/movie{movie_id}/400/600"
+        movie_id = max(1, min(500, movie_id))
+        if type == "hero":
+            url = f"https://picsum.photos/seed/movie{movie_id}/1200/600"
+        else:
+            url = f"https://picsum.photos/seed/movie{movie_id}/400/600"
     return RedirectResponse(url)
+
+@app.get("/movie/{movie_id}")
+def movie_detail(movie_id: int):
+    movie = get_movie(movie_id)
+    if not movie:
+        return JSONResponse(status_code=404, content={"error": "Movie not found"})
+    # Add streaming URLs to sources
+    result = movie.copy()
+    if movie.get("sources"):
+        result["source_urls"] = {}
+        for source in movie["sources"]:
+            result["source_urls"][source] = get_streaming_url(source, movie["title"], movie.get("year"))
+    return result
 
 @app.get("/recommend/{user_id}")
 def recommend(user_id: int, n: int = 5, genres: Optional[str] = None, min_year: Optional[int] = None, max_year: Optional[int] = None):
     if mf is None:
         return JSONResponse(status_code=503, content={"error": "Model not loaded"})
 
+    # Use movies_data.py for filtering instead of movies.csv
+    allowed_movie_ids = None
+    
+    # Get genres from profile if not provided
+    use_genres = genres
+    if not use_genres:
+        row = db_load_profile(user_id)
+        if row is not None:
+            prof = row.to_profile_dict()
+            if prof.get("genres"):
+                use_genres = ",".join(prof["genres"])  # comma-separated
+    
+    # Filter movies from movies_data.py
+    filtered_movies = MOVIES
+    if use_genres:
+        wanted_genres = set([g.strip() for g in use_genres.split(',') if g.strip()])
+        filtered_movies = [
+            m for m in filtered_movies
+            if m.get("genres") and wanted_genres & set(m["genres"])
+        ]
+    
+    if min_year is not None or max_year is not None:
+        filtered_movies = [
+            m for m in filtered_movies
+            if (min_year is None or (m.get("year") and m["year"] >= min_year)) and
+               (max_year is None or (m.get("year") and m["year"] <= max_year))
+        ]
+    
+    # Map to model indices if movies.csv is available
     allowed_indices = None
-    if movies is not None and not movies.empty:
-        df = movies
-        use_genres = genres
-        if not use_genres:
-            row = db_load_profile(user_id)
-            if row is not None:
-                prof = row.to_profile_dict()
-                if prof.get("genres"):
-                    use_genres = ",".join(prof["genres"])  # comma-separated
-        if use_genres:
-            wanted = set([g.strip().strip('()').strip() for g in use_genres.split(',') if g.strip()])
-            if "genres" in df.columns:
-                def row_matches(s: str) -> bool:
-                    tokens = [t.strip().strip('()').strip() for t in str(s).split('|') if t.strip()]
-                    return bool(wanted & set(tokens))
-                df = df[df["genres"].fillna("").apply(row_matches)]
-        if min_year is not None or max_year is not None:
-            def parse_year(t):
-                if isinstance(t, str) and t.endswith(")") and "(" in t:
-                    y = t.rsplit("(", 1)[-1].rstrip(")")
-                    return int(y) if y.isdigit() else None
-                return None
-            years = df["title"].apply(parse_year) if "title" in df.columns else None
-            if years is not None:
-                df = df.copy()
-                df["year"] = years
-                if min_year is not None:
-                    df = df[df["year"].fillna(0) >= int(min_year)]
-                if max_year is not None:
-                    df = df[df["year"].fillna(9999) <= int(max_year)]
-        allowed_indices = set(df["movieId"].astype(int).tolist()) if "movieId" in df.columns else None
+    if movies is not None and not movies.empty and "movieId" in movies.columns:
+        # Get movie IDs from filtered movies
+        allowed_movie_ids = set(m["movie_id"] for m in filtered_movies)
+        # Map to indices in the model (assuming movieId in movies.csv corresponds to movie_id in movies_data.py)
+        allowed_indices = set(
+            movies[movies["movieId"].isin(allowed_movie_ids)]["movieId"].astype(int).tolist()
+        )
 
     preds = []
     for i in range(mf.n_items):
@@ -241,19 +272,29 @@ def recommend(user_id: int, n: int = 5, genres: Optional[str] = None, min_year: 
     top_n = sorted(preds, key=lambda x: x[1], reverse=True)[:n]
 
     recs = []
-    for i, score in top_n:
-        if movies is not None and not movies.empty:
-            row = movies.loc[movies["movieId"] == i]
-            title = row["title"].values[0] if len(row) > 0 and "title" in row else f"Movie {i}"
-            genres = row["genres"].values[0] if len(row) > 0 and "genres" in row else ""
+    # Use filtered movies from movies_data.py
+    available_movie_ids = [m["movie_id"] for m in filtered_movies]
+    
+    for idx, (i, score) in enumerate(top_n):
+        # Map model index to real movie ID from filtered set
+        real_movie_id = available_movie_ids[idx % len(available_movie_ids)] if available_movie_ids else None
+        movie = get_movie(real_movie_id) if real_movie_id else None
+        if movie:
+            recs.append({
+                "movie_id": movie["movie_id"],
+                "title": movie["title"],
+                "genres": "|".join(movie["genres"]),
+                "predicted_rating": float(score),
+                "year": movie.get("year"),
+                "rating": movie.get("rating")
+            })
         else:
-            title = f"Movie {i}"
-            genres = ""
-        recs.append({
-            "movie_id": int(i),
-            "title": title,
-            "genres": genres,
-            "predicted_rating": float(score)
-        })
+            # Fallback
+            recs.append({
+                "movie_id": int(i),
+                "title": f"Movie {i}",
+                "genres": "",
+                "predicted_rating": float(score)
+            })
 
     return {"user_id": user_id, "recommendations": recs}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
+import { Routes, Route, useNavigate, useParams, Link } from 'react-router-dom'
 import './App.css'
 
 const API_BASE = import.meta.env.VITE_API_BASE || '/api';
@@ -50,6 +50,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/survey" element={<SurveyPage />} />
           <Route path="/recommend" element={<RecommendPage />} />
+          <Route path="/movie/:id" element={<MovieDetailPage />} />
         </Routes>
       </main>
     </div>
@@ -452,6 +453,7 @@ function ProfilePage() {
 }
 
 function RecommendPage() {
+  const navigate = useNavigate()
   const [recs, setRecs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -499,7 +501,7 @@ function RecommendPage() {
     <div className="flex flex-col gap-10">
       <h1 className="text-3xl font-semibold">{`Welcome${profileName ? `, ${profileName}` : ''}`}</h1>
       {featured && (
-        <section className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[radial-gradient(1200px_500px_at_80%_-20%,#7c3aed20,transparent),linear-gradient(to_bottom,#0b1020,#0b1020)]">
+        <section onClick={() => navigate(`/movie/${featured.movie_id}`)} className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[radial-gradient(1200px_500px_at_80%_-20%,#7c3aed20,transparent),linear-gradient(to_bottom,#0b1020,#0b1020)] cursor-pointer hover:border-violet-600/50 transition">
           <div className="grid grid-cols-1 lg:grid-cols-3">
             <div className="col-span-2 aspect-[3/1] sm:aspect-[21/9] overflow-hidden">
               <img src={`${API_BASE}/image/${featured.movie_id}?type=hero`} alt="featured" className="h-full w-full object-cover" />
@@ -507,7 +509,13 @@ function RecommendPage() {
             <div className="p-6 flex flex-col gap-3 justify-center">
               <div className="text-xs uppercase tracking-wider text-slate-400">Featured</div>
               <h2 className="text-3xl font-semibold leading-tight line-clamp-2">{featured.title}</h2>
-              <div className="text-sm text-slate-400">Predicted rating <span className="text-slate-200 font-medium">{featured.predicted_rating?.toFixed?.(2) ?? featured.predicted_rating}</span></div>
+              <div className="text-sm text-slate-400">
+                {featured.year && <span>{featured.year} • </span>}
+                {featured.rating && <span>⭐ {featured.rating}/10</span>}
+                {!featured.rating && featured.predicted_rating && (
+                  <span>Predicted rating <span className="text-slate-200 font-medium">{featured.predicted_rating?.toFixed?.(2) ?? featured.predicted_rating}</span></span>
+                )}
+              </div>
               <div className="mt-2 flex gap-2">
                 <button className="rounded-lg bg-violet-600 hover:bg-violet-500 px-4 py-2 text-sm font-medium">Play trailer</button>
                 <button className="rounded-lg bg-slate-800 hover:bg-slate-700 px-4 py-2 text-sm font-medium">Add to watchlist</button>
@@ -564,8 +572,9 @@ function Carousel({ children }) {
 }
 
 function MovieCard({ title, score, genres, movieId }) {
+  const navigate = useNavigate()
   return (
-    <div className="w-[220px] shrink-0 rounded-xl overflow-hidden bg-slate-900/50 border border-slate-800 hover:border-violet-600/50 transition shadow-xl shadow-black/20">
+    <div onClick={() => navigate(`/movie/${movieId}`)} className="w-[220px] shrink-0 rounded-xl overflow-hidden bg-slate-900/50 border border-slate-800 hover:border-violet-600/50 transition shadow-xl shadow-black/20 cursor-pointer">
       <div className="relative aspect-[2/3] bg-slate-900/60">
         {movieId != null && (
           <img src={`${API_BASE}/image/${movieId}?type=poster`} alt="poster" className="absolute inset-0 h-full w-full object-cover" />
@@ -583,6 +592,91 @@ function MovieCard({ title, score, genres, movieId }) {
       <div className="p-3 flex items-center justify-between">
         <div className="text-sm font-medium line-clamp-2 pr-2">{title}</div>
         <div className="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">{score?.toFixed?.(2) ?? score}</div>
+      </div>
+    </div>
+  )
+}
+
+function MovieDetailPage() {
+  const { id } = useParams()
+  const [movie, setMovie] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let ignore = false
+    async function load() {
+      try {
+        const res = await fetch(`${API_BASE}/movie/${encodeURIComponent(id)}`)
+        if (!res.ok) throw new Error('Failed to load movie')
+        const data = await res.json()
+        if (!ignore) setMovie(data)
+      } catch (e) {
+        if (!ignore) setError(e.message || 'Error loading movie')
+      } finally {
+        if (!ignore) setLoading(false)
+      }
+    }
+    load()
+    return () => { ignore = true }
+  }, [id])
+
+  if (loading) return <div className="text-slate-400">Loading…</div>
+  if (error || !movie) return <div className="text-rose-400">{error || 'Movie not found'}</div>
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <img src={`${API_BASE}/image/${movie.movie_id}?type=poster`} alt={movie.title} className="w-full rounded-xl border border-slate-800" />
+        </div>
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          <div>
+            <h1 className="text-4xl font-semibold mb-2">{movie.title}</h1>
+            <div className="flex items-center gap-4 text-slate-400">
+              {movie.year && <span>{movie.year}</span>}
+              {movie.rating && <span>⭐ {movie.rating}/10</span>}
+              {movie.genres && (
+                <div className="flex gap-2 flex-wrap">
+                  {movie.genres.map((g, i) => (
+                    <span key={i} className="px-2 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs">{g}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          {movie.plot && (
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Plot</h2>
+              <p className="text-slate-300 leading-relaxed">{movie.plot}</p>
+            </div>
+          )}
+          {movie.sources && movie.sources.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Available on</h2>
+              <div className="flex gap-2 flex-wrap">
+                {movie.sources.map((source, i) => {
+                  const url = movie.source_urls?.[source]
+                  const content = (
+                    <span className="px-3 py-1 rounded-lg bg-violet-600/20 border border-violet-600/50 text-sm hover:bg-violet-600/30 transition cursor-pointer">
+                      {source}
+                    </span>
+                  )
+                  return url ? (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                      {content}
+                    </a>
+                  ) : (
+                    <span key={i}>{content}</span>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+          <div className="mt-auto pt-4">
+            <button onClick={() => window.history.back()} className="rounded-lg bg-slate-800 hover:bg-slate-700 px-4 py-2 font-medium">Back</button>
+          </div>
+        </div>
       </div>
     </div>
   )
