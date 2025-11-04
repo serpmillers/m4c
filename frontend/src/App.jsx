@@ -30,6 +30,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-slate-100">
       <header className="border-b border-slate-800/80 sticky top-0 z-10 backdrop-blur bg-slate-950/50">
         <div className="mx-auto max-w-7xl px-6 lg:px-8 py-4 flex items-center gap-3">
+          <img src="/MOVAI.jpg" alt="logo" className="h-7 w-7" />
           <a href="/" className="font-semibold tracking-wide">MOVAI</a>
           <div className="ml-auto flex items-center gap-3">
             <a href="/about" className="text-sm text-slate-300 hover:text-white transition">About</a>
