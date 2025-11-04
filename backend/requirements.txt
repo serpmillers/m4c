@@ -55,3 +55,6 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.2
 uvicorn==0.38.0
+sqlmodel==0.0.21
+SQLAlchemy==2.0.36
+bcrypt==4.2.1
