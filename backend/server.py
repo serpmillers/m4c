@@ -82,6 +82,7 @@ class Profile(BaseModel):
     password: Optional[str] = None  # write-only
     genres: List[str] = []
     favorites: List[str] = []
+    watchlist: List[int] = []  # movie IDs
 
 
 @app.get("/")
@@ -174,6 +175,7 @@ def save_profile(user_id: int, body: Profile):
         "password_hash": password_hash,
         "genres": payload.get("genres") or [],
         "favorites": payload.get("favorites") or [],
+        "watchlist": payload.get("watchlist") or [],
     }
     row = db_upsert_profile(to_store)
     return Profile(**row.to_profile_dict())
@@ -237,6 +239,13 @@ def recommend(user_id: int, n: int = 5, genres: Optional[str] = None, min_year: 
             if prof.get("genres"):
                 use_genres = ",".join(prof["genres"])  # comma-separated
     
+    # Get user's watchlist to exclude from recommendations
+    user_watchlist = set()
+    row = db_load_profile(user_id)
+    if row is not None:
+        prof = row.to_profile_dict()
+        user_watchlist = set(prof.get("watchlist", []))
+    
     # Filter movies from movies_data.py
     filtered_movies = MOVIES
     if use_genres:
@@ -252,6 +261,12 @@ def recommend(user_id: int, n: int = 5, genres: Optional[str] = None, min_year: 
             if (min_year is None or (m.get("year") and m["year"] >= min_year)) and
                (max_year is None or (m.get("year") and m["year"] <= max_year))
         ]
+    
+    # Exclude movies already in watchlist
+    filtered_movies = [
+        m for m in filtered_movies
+        if m.get("movie_id") not in user_watchlist
+    ]
     
     # Map to model indices if movies.csv is available
     allowed_indices = None
@@ -286,7 +301,8 @@ def recommend(user_id: int, n: int = 5, genres: Optional[str] = None, min_year: 
                 "genres": "|".join(movie["genres"]),
                 "predicted_rating": float(score),
                 "year": movie.get("year"),
-                "rating": movie.get("rating")
+                "rating": movie.get("rating"),
+                "trailer_youtube_id": movie.get("trailer_youtube_id")
             })
         else:
             # Fallback
@@ -298,3 +314,93 @@ def recommend(user_id: int, n: int = 5, genres: Optional[str] = None, min_year: 
             })
 
     return {"user_id": user_id, "recommendations": recs}
+
+@app.get("/watchlist/{user_id}")
+def get_watchlist(user_id: int):
+    """Get user's watchlist"""
+    row = db_load_profile(user_id)
+    if row is None:
+        return JSONResponse(status_code=404, content={"error": "User not found"})
+    prof = row.to_profile_dict()
+    watchlist_movie_ids = prof.get("watchlist", [])
+    watchlist_movies = []
+    for movie_id in watchlist_movie_ids:
+        movie = get_movie(movie_id)
+        if movie:
+            watchlist_movies.append({
+                "movie_id": movie["movie_id"],
+                "title": movie["title"],
+                "year": movie.get("year"),
+                "rating": movie.get("rating"),
+                "genres": movie.get("genres", []),
+                "poster_path": movie.get("poster_path"),
+                "trailer_youtube_id": movie.get("trailer_youtube_id")
+            })
+    return {"watchlist": watchlist_movies}
+
+@app.post("/watchlist/{user_id}/add/{movie_id}")
+def add_to_watchlist(user_id: int, movie_id: int):
+    """Add a movie to user's watchlist"""
+    row = db_load_profile(user_id)
+    if row is None:
+        return JSONResponse(status_code=404, content={"error": "User not found"})
+    
+    # Verify movie exists
+    movie = get_movie(movie_id)
+    if not movie:
+        return JSONResponse(status_code=404, content={"error": "Movie not found"})
+    
+    prof = row.to_profile_dict()
+    watchlist = prof.get("watchlist", [])
+    
+    if movie_id not in watchlist:
+        watchlist.append(movie_id)
+        to_store = {
+            "user_id": user_id,
+            "name": prof.get("name"),
+            "avatar_data_url": prof.get("avatar_data_url"),
+            "account": prof.get("account"),
+            "email": prof.get("email"),
+            "genres": prof.get("genres", []),
+            "favorites": prof.get("favorites", []),
+            "watchlist": watchlist,
+        }
+        db_upsert_profile(to_store)
+    
+    return {"message": "Added to watchlist", "watchlist": watchlist}
+
+@app.post("/watchlist/{user_id}/remove/{movie_id}")
+def remove_from_watchlist(user_id: int, movie_id: int):
+    """Remove a movie from user's watchlist"""
+    row = db_load_profile(user_id)
+    if row is None:
+        return JSONResponse(status_code=404, content={"error": "User not found"})
+    
+    prof = row.to_profile_dict()
+    watchlist = prof.get("watchlist", [])
+    
+    if movie_id in watchlist:
+        watchlist = [m for m in watchlist if m != movie_id]
+        to_store = {
+            "user_id": user_id,
+            "name": prof.get("name"),
+            "avatar_data_url": prof.get("avatar_data_url"),
+            "account": prof.get("account"),
+            "email": prof.get("email"),
+            "genres": prof.get("genres", []),
+            "favorites": prof.get("favorites", []),
+            "watchlist": watchlist,
+        }
+        db_upsert_profile(to_store)
+    
+    return {"message": "Removed from watchlist", "watchlist": watchlist}
+
+@app.get("/watchlist/{user_id}/check/{movie_id}")
+def check_watchlist(user_id: int, movie_id: int):
+    """Check if a movie is in user's watchlist"""
+    row = db_load_profile(user_id)
+    if row is None:
+        return {"in_watchlist": False}
+    prof = row.to_profile_dict()
+    watchlist = prof.get("watchlist", [])
+    return {"in_watchlist": movie_id in watchlist}

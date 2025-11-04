@@ -8,7 +8,8 @@ MOVIES = [
         "plot": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
         "rating": 9.3,
         "sources": ["Netflix", "Amazon Prime"],
-        "poster_path": "/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg"
+        "poster_path": "/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg",
+        "trailer_youtube_id": "6hB3S9bIaco"
     },
     {
         "movie_id": 2,
@@ -28,7 +29,8 @@ MOVIES = [
         "plot": "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
         "rating": 9.0,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/qJ2tW6WMUDux911r6m7haRef0WH.jpg"
+        "poster_path": "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+        "trailer_youtube_id": "EXeTwQWrcwY"
     },
     {
         "movie_id": 4,
@@ -58,7 +60,8 @@ MOVIES = [
         "plot": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
         "rating": 8.8,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg"
+        "poster_path": "/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
+        "trailer_youtube_id": "YoHD9XEInc0"
     },
     {
         "movie_id": 7,
@@ -138,7 +141,7 @@ MOVIES = [
         "plot": "The lives of guards on Death Row are affected by one of their charges: a black man accused of child murder and rape, yet who has a mysterious gift.",
         "rating": 8.6,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/yuUs9K9ozeyvJg5ztB5rTQ5V6Mm.jpg"
+        "poster_path": "/o0lO84GI7qrG6XFvtsPOSV7CTNa.jpg"
     },
     {
         "movie_id": 15,
@@ -148,7 +151,7 @@ MOVIES = [
         "plot": "A Polish Jewish musician struggles to survive the destruction of the Warsaw ghetto of World War II.",
         "rating": 8.5,
         "sources": ["Netflix", "Amazon Prime"],
-        "poster_path": "/2m0APu4z3j9gv7GwdgV5Z19F8zN.jpg"
+        "poster_path": "/2hFvxCCWrTmCYwfy7yum0GKRi3Y.jpg"
     },
     {
         "movie_id": 16,
@@ -168,7 +171,7 @@ MOVIES = [
         "plot": "An undercover cop and a mole in the police force both attempt to identify each other while infiltrating an Irish gang in South Boston.",
         "rating": 8.5,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/nT97ifVT2J1yMQme7w4auJQPxUX.jpg"
+        "poster_path": "/nT97ifVT2J1yMQmeq20Qblg61T.jpg"
     },
     {
         "movie_id": 18,
@@ -178,7 +181,7 @@ MOVIES = [
         "plot": "A promising young drummer enrolls at a cut-throat music conservatory where his dreams of greatness are mentored by an instructor who will stop at nothing to realize a student's potential.",
         "rating": 8.5,
         "sources": ["Netflix", "Amazon Prime"],
-        "poster_path": "/7fn624j5j3HHADd3u0qz6ybnOW0.jpg"
+        "poster_path": "/7fn624j5lj3xTme2SgiLCeuedmO.jpg"
     },
     {
         "movie_id": 19,
@@ -188,7 +191,7 @@ MOVIES = [
         "plot": "After a tragic accident, two stage magicians engage in a battle to create the ultimate illusion while sacrificing everything they have to outwit each other.",
         "rating": 8.5,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/bdN3gv8b0KGh7FC5jWP45bgQ2FK.jpg"
+        "poster_path": "/2ZOzyhoW08neG27DVySMCcq2emd.jpg"
     },
     {
         "movie_id": 20,
@@ -198,7 +201,7 @@ MOVIES = [
         "plot": "A man with short-term memory loss attempts to track down his wife's murderer.",
         "rating": 8.4,
         "sources": ["Netflix", "Amazon Prime"],
-        "poster_path": "/yuNs09hvpHVU1cBTCAkbrz15zN2.jpg"
+        "poster_path": "/fKTPH2WvH8nHTXeBYBVhawtRqtR.jpg"
     },
     {
         "movie_id": 21,
@@ -218,7 +221,8 @@ MOVIES = [
         "plot": "After the devastating events of Avengers: Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more to reverse Thanos' actions and restore balance.",
         "rating": 8.4,
         "sources": ["Disney+", "Amazon Prime"],
-        "poster_path": "/or06FN3Duk5m8xN8Q6YLP3b9qOm.jpg"
+        "poster_path": "/bR8ISy1O9XQxqiy0fQFw2BX72RQ.jpg",
+        "trailer_youtube_id": "r6x0R43JjjQ"
     },
     {
         "movie_id": 23,
@@ -228,7 +232,7 @@ MOVIES = [
         "plot": "With the help of a German bounty hunter, a freed slave sets out to rescue his wife from a brutal Mississippi plantation owner.",
         "rating": 8.4,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/7o3YlyFfveqX5jQK38M3v7j3wFz.jpg"
+        "poster_path": "/7oWY8VDWW7thTzWh3OKYRkWUlD5.jpg"
     },
     {
         "movie_id": 24,
@@ -238,7 +242,7 @@ MOVIES = [
         "plot": "A family heads to an isolated hotel for the winter where a sinister presence influences the father into violence, while his psychic son sees horrific forebodings from both past and future.",
         "rating": 8.4,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/9n2pFfQccRIcU6fIMKadhUcq3CV.jpg"
+        "poster_path": "/upBsuweJjBftrkJGqVf8PHCdH0l.jpg"
     },
     {
         "movie_id": 25,
@@ -272,13 +276,13 @@ MOVIES = [
     },
     {
         "movie_id": 28,
-        "title": "The Grand Budapest Hotel",
-        "year": 2014,
-        "genres": ["Adventure", "Comedy", "Crime"],
-        "plot": "A writer encounters the owner of an aging high-class hotel, who tells him of his early years serving as a lobby boy in the hotel's glorious years under an exceptional concierge.",
-        "rating": 8.1,
-        "sources": ["Netflix", "Hulu"],
-        "poster_path": "/eWMoV0Y78USjM8g8fOhr5KwatF6.jpg"
+        "title": "Alita: Battle Angel",
+        "year": 2019,
+        "genres": ["Action", "Adventure", "Sci-Fi"],
+        "plot": "A deactivated cyborg's revived, but can't remember anything of her past and goes on a quest to find out who she is.",
+        "rating": 7.3,
+        "sources": ["Disney+", "Hulu"],
+        "poster_path": "/xRWht48C2V8XNfzvPehyClOvDni.jpg"
     },
     {
         "movie_id": 29,
@@ -318,7 +322,7 @@ MOVIES = [
         "plot": "An insurance salesman discovers his whole life is actually a reality TV show.",
         "rating": 8.2,
         "sources": ["Netflix", "Amazon Prime"],
-        "poster_path": "/vuZ5Y0cWOJdJ1v6Y1qnk5u5Y3q.jpg"
+        "poster_path": "/vuza0WqY239yBXOadKlGwJsZJFE.jpg"
     },
     {
         "movie_id": 33,
@@ -328,7 +332,7 @@ MOVIES = [
         "plot": "A young African-American visits his white girlfriend's parents for the weekend, where his uneasiness about their reception of him eventually reaches a boiling point.",
         "rating": 7.8,
         "sources": ["Netflix", "Hulu"],
-        "poster_path": "/tFXcEveQnDjnpfOAcN48Kparb4M.jpg"
+        "poster_path": "/tFXcEccSQMf3lfhfXKSU9iRBpa3.jpg"
     },
     {
         "movie_id": 34,
@@ -338,7 +342,7 @@ MOVIES = [
         "plot": "As Harvard student Mark Zuckerberg creates the social networking site that would become known as Facebook, he is sued by the twins who claimed he stole their idea, and by the co-founder who was later squeezed out of the business.",
         "rating": 7.8,
         "sources": ["Netflix", "Amazon Prime"],
-        "poster_path": "/n0ybibhJtQ5icDqTp8eRytb3Pvl.jpg"
+        "poster_path": "/n0ybibhJtQ5icDqTp8eRytcIHJx.jpg"
     },
     {
         "movie_id": 35,
@@ -378,7 +382,7 @@ MOVIES = [
         "plot": "A writer encounters the owner of an aging high-class hotel, who tells him of his early years serving as a lobby boy in the hotel's glorious years under an exceptional concierge.",
         "rating": 8.1,
         "sources": ["Netflix", "Hulu"],
-        "poster_path": "/eWMoV0Y78USjM8g8fOhr5KwatF6.jpg"
+        "poster_path": "/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg"
     },
     {
         "movie_id": 39,
@@ -388,7 +392,7 @@ MOVIES = [
         "plot": "Violence and mayhem ensue after a hunter stumbles upon a drug deal gone wrong and more than two million dollars in cash near the Rio Grande.",
         "rating": 8.2,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/nBNZadXmqJSq05eQh0rOX6s7izz.jpg"
+        "poster_path": "/6d5XOczc226jECq0LIX0siKtgHR.jpg"
     },
     {
         "movie_id": 40,
@@ -438,7 +442,7 @@ MOVIES = [
         "plot": "Marty McFly, a 17-year-old high school student, is accidentally sent thirty years into the past in a time-traveling DeLorean invented by his close friend, the maverick scientist Doc Brown.",
         "rating": 8.5,
         "sources": ["Netflix", "Amazon Prime"],
-        "poster_path": "/fNOH9f1aB7t2H9f1aB7t2H9f1aB.jpg"
+        "poster_path": "/vN5B5WgYscRGcQpVhHl6p9DDTP0.jpg"
     },
     {
         "movie_id": 45,
@@ -458,7 +462,7 @@ MOVIES = [
         "plot": "The crew of a commercial spacecraft encounter a deadly lifeform after investigating an unknown transmission.",
         "rating": 8.5,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/bEWO3xaf60f1QoZN8pyqD8kwWjY.jpg"
+        "poster_path": "/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg"
     },
     {
         "movie_id": 47,
@@ -468,7 +472,7 @@ MOVIES = [
         "plot": "When a 12-year-old girl is possessed by a mysterious entity, her mother seeks the help of two priests to save her.",
         "rating": 8.1,
         "sources": ["Netflix", "Amazon Prime"],
-        "poster_path": "/4ucLGcRWj4S8s831RZ6gO9ES2a9.jpg"
+        "poster_path": "/5x0CeVHJI8tcDx8tUUwYHQSNILq.jpg"
     },
     {
         "movie_id": 48,
@@ -478,7 +482,7 @@ MOVIES = [
         "plot": "When a killer shark unleashes chaos on a beach community, it's up to a local sheriff, a marine biologist, and an old seafarer to hunt the beast down.",
         "rating": 8.0,
         "sources": ["Netflix", "HBO Max"],
-        "poster_path": "/ywotB50v06sT5q1h29Ry4W5iz1z.jpg"
+        "poster_path": "/lxM6kqilAdpdhqUl2biYp5frUxE.jpg"
     },
     {
         "movie_id": 49,
@@ -498,7 +502,7 @@ MOVIES = [
         "plot": "A troubled child summons the courage to help a friendly alien escape Earth and return to his home world.",
         "rating": 7.8,
         "sources": ["Netflix", "Amazon Prime"],
-        "poster_path": "/an0nD6sa6MYhRXK8sGle8Q6f5mW.jpg"
+        "poster_path": "/an0nD6uq6byfxXCfk6lQBzdL2J1.jpg"
     }
 ]
 

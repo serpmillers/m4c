@@ -15,6 +15,7 @@ class ProfileRow(SQLModel, table=True):
     password_hash: Optional[str] = None
     genres_json: Optional[str] = None  # JSON-encoded list[str]
     favorites_json: Optional[str] = None  # JSON-encoded list[str]
+    watchlist_json: Optional[str] = None  # JSON-encoded list[int] (movie IDs)
 
     @staticmethod
     def from_profile_dict(d: dict) -> "ProfileRow":
@@ -27,6 +28,7 @@ class ProfileRow(SQLModel, table=True):
             password_hash=d.get("password_hash"),
             genres_json=json.dumps(d.get("genres") or []),
             favorites_json=json.dumps(d.get("favorites") or []),
+            watchlist_json=json.dumps(d.get("watchlist") or []),
         )
 
     def to_profile_dict(self) -> dict:
@@ -38,6 +40,10 @@ class ProfileRow(SQLModel, table=True):
             favorites = json.loads(self.favorites_json) if self.favorites_json else []
         except Exception:
             favorites = []
+        try:
+            watchlist = json.loads(self.watchlist_json) if self.watchlist_json else []
+        except Exception:
+            watchlist = []
         return {
             "user_id": self.user_id,
             "name": self.name,
@@ -47,6 +53,7 @@ class ProfileRow(SQLModel, table=True):
             # never expose password_hash in API responses
             "genres": genres,
             "favorites": favorites,
+            "watchlist": watchlist,
         }
 
 def _column_exists(cursor, table: str, column: str) -> bool:
@@ -72,6 +79,8 @@ def init_db() -> None:
             cursor.execute("ALTER TABLE profilerow ADD COLUMN genres_json TEXT")
         if not _column_exists(cursor, "profilerow", "favorites_json"):
             cursor.execute("ALTER TABLE profilerow ADD COLUMN favorites_json TEXT")
+        if not _column_exists(cursor, "profilerow", "watchlist_json"):
+            cursor.execute("ALTER TABLE profilerow ADD COLUMN watchlist_json TEXT")
         conn.connection.commit()
 
 
@@ -117,6 +126,8 @@ def upsert_profile(data: dict) -> ProfileRow:
                 existing.password_hash = row.password_hash
             existing.genres_json = row.genres_json
             existing.favorites_json = row.favorites_json
+            if row.watchlist_json is not None:
+                existing.watchlist_json = row.watchlist_json
             row = existing
         session.commit()
         session.refresh(row)
